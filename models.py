@@ -1,33 +1,57 @@
 import numpy as np
 
-def model1_ode(t, y, r_S, r_R, d_max_S, d_max_R, EC50_S, EC50_R, mu, A):
-    S, R = y
-    dSdt = r_S * S - (d_max_S * (A / EC50_S)) * S
-    dRdt = r_R * R + mu * r_S * S - (d_max_R * (A / EC50_R)) * R
-    return [dSdt, dRdt]
-
-def model2_ode(t, y, r_S, r_R, K, mu, E_max_S, E_max_R, EC50_S, EC50_R, H, A):
-    S, R = y
+def logistic_factor(S, R, K):
     N = S + R
-    growth_factor = 1.0 - (N / K) if K > 0 else 1.0
+    if K <= 0:
+        return 1.0
+    return max(0.0, 1.0 - N / K)
 
-    phi_S = (E_max_S * (A**H)) / ((EC50_S**H) + (A**H)) if A > 0 else 0
-    phi_R = (E_max_R * (A**H)) / ((EC50_R**H) + (A**H)) if A > 0 else 0
+def model1_ode(t,y, r_S,r_R,K,mu,alpha_S,alpha_R, A):
+    S, R = y
+    growth = logistic_factor(S, R, K)
 
-    dSdt = r_S * S * growth_factor * (1.0 - mu) - phi_S * S
-    dRdt = r_R * R * growth_factor + mu * r_S * S * growth_factor - phi_R * R
+    dSdt = ( r_S * S * growth * (1.0 - mu) - alpha_S * A * S)
+    dRdt = ( r_R * R * growth  + mu * r_S * S * growth - alpha_R * A * R )
     return [dSdt, dRdt]
 
-def model3_ode(t, y, r_S, r_R, K, mu, E_max_S, E_max_R, EC50_S, EC50_R, H, k_d):
+def hill_effect( A,  E_max,EC50, H):
+    if A <= 0:
+        return 0.0
+
+    numerator = E_max * (A ** H)
+    denominator = (EC50 ** H) + (A ** H)
+
+    if denominator == 0:
+        return 0.0
+    return numerator / denominator
+
+def model2_ode( t, y, r_S,  r_R,K, mu, Emax_S, Emax_R, EC50_S, EC50_R, H,  A):
+    S, R = y
+    growth = logistic_factor(S, R, K)
+
+    phi_S = hill_effect( A, Emax_S, EC50_S, H )
+    phi_R = hill_effect( A, Emax_R, EC50_R, H )
+
+    dSdt = (r_S * S * growth * (1.0 - mu)- phi_S * S)
+    dRdt = ( r_R * R * growth + mu * r_S * S * growth- phi_R * R )
+    return [dSdt, dRdt]
+
+def model3_ode(t, y, r_S, r_R, K, mu, Emax_S, Emax_R, EC50_S, EC50_R, H, k_d):
     S, R, A = y
-    N = S + R
-    growth_factor = 1.0 - (N / K) if K > 0 else 1.0
+    growth = logistic_factor(S, R, K)
 
-    phi_S = (E_max_S * (A**H)) / ((EC50_S**H) + (A**H)) if A > 0 else 0
-    phi_R = (E_max_R * (A**H)) / ((EC50_R**H) + (A**H)) if A > 0 else 0
+    phi_S = hill_effect( A, Emax_S, EC50_S, H )
+    phi_R = hill_effect( A, Emax_R, EC50_R, H )
 
-    dSdt = r_S * S * growth_factor * (1.0 - mu) - phi_S * S
-    dRdt = r_R * R * growth_factor + mu * r_S * S * growth_factor - phi_R * R
-    dAdt = -k_d * A  
+    dSdt = ( r_S * S * growth * (1.0 - mu) - phi_S * S )
+    dRdt = ( r_R * R * growth + mu * r_S * S * growth- phi_R * R )
+    dAdt = -k_d * A
+    return [dSdt, dRdt, dAdt ]
 
-    return [dSdt, dRdt, dAdt]
+def get_total_population(solution):
+    return solution.y[0] + solution.y[1]
+
+def get_resistance_ratio(solution):
+    total = solution.y[0] + solution.y[1]
+    total = np.where(total == 0, 1e-12, total)
+    return solution.y[1] / total
