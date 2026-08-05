@@ -197,4 +197,4 @@ plt.savefig(
         )
 
 plt.show()
-print("Finished.")
+print("Finish")
