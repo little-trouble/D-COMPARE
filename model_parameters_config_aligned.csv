@@ -1,0 +1,49 @@
+﻿drug,parameter,value,unit,note
+ciprofloxacin,S0,100000.0,cells,initial susceptible population (config.py default)
+ciprofloxacin,R0,10,cells,initial resistant population (config.py default)
+ciprofloxacin,A0,1.0,normalized conc.,initial drug concentration (config.py default)
+ciprofloxacin,K,1000000000.0,cells (carrying capacity),logistic carrying capacity (config.py default)
+ciprofloxacin,mu,1e-08,per generation,config.py hardcoded value (literature geometric-mean estimate was 3.16e-9 -- config.py currently ignores the drug-induced fold-increase)
+ciprofloxacin,H,2.0,dimensionless,config.py: steeper Hill slope for concentration-dependent bactericidal drug
+ciprofloxacin,k_d,0.05,h^-1,config.py default first-order drug decay rate (model3_ode)
+ciprofloxacin,r_S_initial_guess,0.8,h^-1,config.py initial_guess[0]; within literature growth-rate range 0.69-2.1 h^-1
+ciprofloxacin,r_S_bounds_low,0.1,h^-1,config.py bounds[0][0]
+ciprofloxacin,r_S_bounds_high,2.0,h^-1,config.py bounds[0][1]; matches literature upper bound 2.1 h^-1 (rounded)
+ciprofloxacin,r_R_initial_guess,0.6,h^-1,config.py initial_guess[1]; resistant strains typically grow slightly slower (fitness cost)
+ciprofloxacin,r_R_bounds_low,0.1,h^-1,config.py bounds[1][0]
+ciprofloxacin,r_R_bounds_high,2.0,h^-1,config.py bounds[1][1]
+ciprofloxacin,Emax_S_initial_guess,2.0,h^-1 (max kill rate),"config.py initial_guess[2]; NOT in reference document, needs literature Emax value (e.g., Regoes et al. 2004)"
+ciprofloxacin,Emax_S_bounds_low,0.1,h^-1,config.py bounds[2][0]
+ciprofloxacin,Emax_S_bounds_high,10.0,h^-1,config.py bounds[2][1]
+ciprofloxacin,EC50_S_initial_guess,0.5,normalized conc. units,"config.py initial_guess[3] (same for both drugs -- see note: literature MIC_S differs 300x between drugs, consider drug-specific initial guess)"
+ciprofloxacin,EC50_S_bounds_low,0.01,normalized conc. units,config.py bounds[3][0]
+ciprofloxacin,EC50_S_bounds_high,5.0,normalized conc. units,config.py bounds[3][1]
+ciprofloxacin,literature_MIC_susceptible,0.00775,mg/L,"geometric mean of 0.004-0.015 mg/L (EUCAST/CLSI range, ATCC 25922)"
+ciprofloxacin,literature_MIC_resistant,1.0,mg/L,EUCAST/CLSI resistant breakpoint lower bound
+ciprofloxacin,literature_mutation_induction_fold,2.855,x baseline,mean of reported 1.71x-4x range (SOS response induction)
+ciprofloxacin,Emax_R_formula,Emax_S * 0.1,h^-1,main.py hardcoded relationship: resistant strain kill rate = 10% of susceptible
+ciprofloxacin,EC50_R_formula,EC50_S * 10,normalized conc. units,"main.py hardcoded relationship: resistant strain EC50 = 10x susceptible (i.e., needs 10x more drug)"
+ampicillin,S0,100000.0,cells,initial susceptible population (config.py default)
+ampicillin,R0,10,cells,initial resistant population (config.py default)
+ampicillin,A0,1.0,normalized conc.,initial drug concentration (config.py default)
+ampicillin,K,1000000000.0,cells (carrying capacity),logistic carrying capacity (config.py default)
+ampicillin,mu,1e-08,per generation,config.py hardcoded value (literature geometric-mean estimate was 3.16e-9 -- config.py currently ignores the drug-induced fold-increase)
+ampicillin,H,1.0,dimensionless,"config.py: shallower Hill slope (time-dependent killer, per document)"
+ampicillin,k_d,0.05,h^-1,config.py default first-order drug decay rate (model3_ode)
+ampicillin,r_S_initial_guess,0.8,h^-1,config.py initial_guess[0]; within literature growth-rate range 0.69-2.1 h^-1
+ampicillin,r_S_bounds_low,0.1,h^-1,config.py bounds[0][0]
+ampicillin,r_S_bounds_high,2.0,h^-1,config.py bounds[0][1]; matches literature upper bound 2.1 h^-1 (rounded)
+ampicillin,r_R_initial_guess,0.6,h^-1,config.py initial_guess[1]; resistant strains typically grow slightly slower (fitness cost)
+ampicillin,r_R_bounds_low,0.1,h^-1,config.py bounds[1][0]
+ampicillin,r_R_bounds_high,2.0,h^-1,config.py bounds[1][1]
+ampicillin,Emax_S_initial_guess,2.0,h^-1 (max kill rate),"config.py initial_guess[2]; NOT in reference document, needs literature Emax value (e.g., Regoes et al. 2004)"
+ampicillin,Emax_S_bounds_low,0.1,h^-1,config.py bounds[2][0]
+ampicillin,Emax_S_bounds_high,10.0,h^-1,config.py bounds[2][1]
+ampicillin,EC50_S_initial_guess,0.5,normalized conc. units,"config.py initial_guess[3] (same for both drugs -- see note: literature MIC_S differs 300x between drugs, consider drug-specific initial guess)"
+ampicillin,EC50_S_bounds_low,0.01,normalized conc. units,config.py bounds[3][0]
+ampicillin,EC50_S_bounds_high,5.0,normalized conc. units,config.py bounds[3][1]
+ampicillin,literature_MIC_susceptible,2.8284,mg/L,"geometric mean of 2.0-4.0 mg/L (EUCAST/CLSI range, ATCC 25922)"
+ampicillin,literature_MIC_resistant,32.0,mg/L,"EUCAST/CLSI resistant breakpoint lower bound (beta-lactamase producers, e.g. TEM-1)"
+ampicillin,literature_mutation_induction_fold,3.0,x baseline,"single reported value, antibiotic-induced mutagenesis"
+ampicillin,Emax_R_formula,Emax_S * 0.1,h^-1,main.py hardcoded relationship: resistant strain kill rate = 10% of susceptible
+ampicillin,EC50_R_formula,EC50_S * 10,normalized conc. units,"main.py hardcoded relationship: resistant strain EC50 = 10x susceptible (i.e., needs 10x more drug)"
