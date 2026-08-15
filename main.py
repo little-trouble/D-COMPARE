@@ -10,18 +10,7 @@ from metrics import compare_models, tres
 
 t_data = np.array([0, 2, 4, 6, 8, 12, 16, 24, 32, 48])
 
-N_data = np.array([
-    1e5,
-    8e4,
-    5e4,
-    2e4,
-    1e4,
-    5e4,
-    3e6,
-    8e7,
-    1e9,
-    1e9                                     
-])
+
 
 log_data = np.log10(N_data + 1)
 
