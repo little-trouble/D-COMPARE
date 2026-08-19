@@ -1,12 +1,13 @@
 import pandas as pd
 import os
 
-# ------------------------------------------------------------------
-# Loads all model parameters from model_parameters_config_aligned.csv
-# instead of hardcoding them. To switch drugs, just change `drug`.
-# ------------------------------------------------------------------
-
 drug = "ciprofloxacin"   # or "ampicillin"
+
+S0 = 1e5
+R0 = 10
+A0 = 1.0
+K = 1e9
+mu = 1e-8
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "model_parameters_config_aligned.csv")
 
@@ -17,23 +18,19 @@ def _get(name, cast=float):
     """Pull a single parameter value for the current drug and cast it."""
     return cast(_df.loc[name])
 
-# --- Initial conditions ---
 S0 = _get("S0")
 R0 = _get("R0")
 A0 = _get("A0")
 
-# --- Model constants ---
 K  = _get("K")
 mu = _get("mu")
 H  = _get("H")
 k_d = _get("k_d")
 
-# --- Time grid ---
 t_start = 0
 t_end = 48
 n_points = 500
 
-# --- Fitting: initial guess and bounds, built from the CSV rows ---
 initial_guess = [
     _get("r_S_initial_guess"),     # r_S
     _get("r_R_initial_guess"),     # r_R
