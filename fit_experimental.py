@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import minimize
 
 from models import model1_ode, model2_ode, model3_ode
-from metrics import calculate_r2, calculate_rmse, calculate_aic, calculate_tres
+from metrics import r2, rmse, aic, tres
 
 df = pd.read_csv("experimental_timekill_ecoli.csv")
 
@@ -13,9 +12,9 @@ df["cfu_ml"] = 10 ** df["log10_cfu_ml"]
 
 drugs = df["drug"].unique()
 
-# Fixed parameters
 K = 1e9
 mu = 1e-8
+
 H_default = {
     "ciprofloxacin": 2.0,
     "ampicillin": 1.0
@@ -23,9 +22,8 @@ H_default = {
 
 R0 = 10.0
 
-def fit_model1(data):
 
-    H = H_default[data["drug"].iloc[0]]
+def fit_model1(data):
 
     def objective(params):
 
@@ -44,7 +42,8 @@ def fit_model1(data):
             sol = solve_ivp(
                 lambda t, y: model1_ode(
                     t, y,
-                    r_S, r_R,
+                    r_S,
+                    r_R,
                     d_max_S,
                     d_max_S * 0.1,
                     EC50_S,
@@ -81,6 +80,7 @@ def fit_model1(data):
 
     return result.x
 
+
 def fit_model2(data):
 
     H = H_default[data["drug"].iloc[0]]
@@ -102,8 +102,10 @@ def fit_model2(data):
             sol = solve_ivp(
                 lambda t, y: model2_ode(
                     t, y,
-                    r_S, r_R,
-                    K, mu,
+                    r_S,
+                    r_R,
+                    K,
+                    mu,
                     E_max_S,
                     E_max_S * 0.1,
                     EC50_S,
@@ -162,8 +164,10 @@ def fit_model3(data):
             sol = solve_ivp(
                 lambda t, y: model3_ode(
                     t, y,
-                    r_S, r_R,
-                    K, mu,
+                    r_S,
+                    r_R,
+                    K,
+                    mu,
                     E_max_S,
                     E_max_S * 0.1,
                     EC50_S,
@@ -224,8 +228,10 @@ def evaluate_model(data, model, params):
 
             sol = solve_ivp(
                 lambda t, y: model1_ode(
-                    t, y,
-                    r_S, r_R,
+                    t,
+                    y,
+                    r_S,
+                    r_R,
                     d_max_S,
                     d_max_S * 0.1,
                     EC50_S,
@@ -244,9 +250,12 @@ def evaluate_model(data, model, params):
 
             sol = solve_ivp(
                 lambda t, y: model2_ode(
-                    t, y,
-                    r_S, r_R,
-                    K, mu,
+                    t,
+                    y,
+                    r_S,
+                    r_R,
+                    K,
+                    mu,
                     E_max_S,
                     E_max_S * 0.1,
                     EC50_S,
@@ -265,9 +274,12 @@ def evaluate_model(data, model, params):
 
             sol = solve_ivp(
                 lambda t, y: model3_ode(
-                    t, y,
-                    r_S, r_R,
-                    K, mu,
+                    t,
+                    y,
+                    r_S,
+                    r_R,
+                    K,
+                    mu,
                     E_max_S,
                     E_max_S * 0.1,
                     EC50_S,
@@ -280,25 +292,34 @@ def evaluate_model(data, model, params):
                 t_eval=t
             )
 
+        if not sol.success:
+            continue
+
         N_pred = sol.y[0] + sol.y[1]
 
         observed.extend(y_obs)
-        predicted.extend(np.log10(np.maximum(N_pred, 1)))
+        predicted.extend(
+            np.log10(np.maximum(N_pred, 1))
+        )
 
     observed = np.array(observed)
     predicted = np.array(predicted)
 
     return (
-        calculate_r2(observed, predicted),
-        calculate_rmse(observed, predicted),
-        calculate_aic(observed, predicted, len(params))
+        r2(observed, predicted),
+        rmse(observed, predicted),
+        aic(observed, predicted, len(params))
     )
+
+
 for drug in drugs:
 
     data = df[df["drug"] == drug].copy()
 
+    print("\n" + "=" * 50)
     print(drug.upper())
-    
+    print("=" * 50)
+
     p1 = fit_model1(data)
     p2 = fit_model2(data)
     p3 = fit_model3(data)
@@ -324,4 +345,3 @@ for drug in drugs:
     print("R2 =", r2_3)
     print("RMSE =", rmse_3)
     print("AIC =", aic_3)
-
